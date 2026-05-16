@@ -1,0 +1,17 @@
+global:
+  smtp_smarthost: "mailpit:1025"
+  smtp_from: "alerts@incident-portal.local"
+  smtp_require_tls: false
+
+route:
+  receiver: "email-alerts"
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 5m
+
+receivers:
+  - name: "email-alerts"
+    email_configs:
+      - to: "admin@incident-portal.local"
+        send_resolved: true
