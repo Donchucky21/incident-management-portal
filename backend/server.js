@@ -1,8 +1,36 @@
 const express = require("express");
 const cors = require("cors");
-const client = require("prom-client");
 const db = require("./db");
 const { metricsMiddleware, metricsEndpoint } = require("./metrics");
+
+
+async function initializeDatabase() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS tickets (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        category VARCHAR(100) DEFAULT 'General',
+        priority VARCHAR(50) DEFAULT 'Medium',
+        status VARCHAR(50) DEFAULT 'Open',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await db.query(`
+      ALTER TABLE tickets
+      ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'General';
+    `);
+
+    console.log("Database initialized: tickets table is ready");
+  } catch (error) {
+    console.error("Database initialization failed:", error.message);
+  }
+}
+
+initializeDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,76 +39,38 @@ app.use(cors());
 app.use(metricsMiddleware);
 app.use(express.json());
 
-const register = new client.Registry();
-
-client.collectDefaultMetrics({
-  register,
-});
-
-const httpRequestDuration = new client.Histogram({
-  name: "http_request_duration_seconds",
-  help: "Duration of HTTP requests in seconds",
-  labelNames: ["method", "route", "status_code"],
-  buckets: [0.1, 0.3, 0.5, 1, 1.5, 2, 5],
-});
-
-const httpRequestCounter = new client.Counter({
-  name: "http_requests_total",
-  help: "Total number of HTTP requests",
-  labelNames: ["method", "route", "status_code"],
-});
-
-register.registerMetric(httpRequestDuration);
-register.registerMetric(httpRequestCounter);
-
-app.use((req, res, next) => {
-  const start = process.hrtime();
-
-  res.on("finish", () => {
-    const diff = process.hrtime(start);
-    const duration = diff[0] + diff[1] / 1e9;
-
-    const route = req.route ? req.route.path : req.path;
-
-    httpRequestDuration
-      .labels(req.method, route, res.statusCode)
-      .observe(duration);
-
-    httpRequestCounter
-      .labels(req.method, route, res.statusCode)
-      .inc();
-  });
-
-  next();
-});
-
 app.get("/", (req, res) => {
   res.json({
     message: "Incident Management API is running",
   });
 });
 
-app.get("/health", async (req, res) => {
+// App-only health check for ECS/ALB.
+// This should not depend on the database, otherwise ECS may keep killing healthy app containers.
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "incident-management-backend",
+  });
+});
+
+// Separate database health check.
+// This uses the existing db module instead of an undefined pool variable.
+app.get("/api/health/db", async (req, res) => {
   try {
     await db.query("SELECT 1");
 
     res.status(200).json({
       status: "ok",
       database: "connected",
-      service: "incident-management-backend",
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      database: "disconnected",
+      database: "not connected",
       message: error.message,
     });
   }
-});
-
-app.get("/metrics", async (req, res) => {
-  res.set("Content-Type", register.contentType);
-  res.end(await register.metrics());
 });
 
 app.get("/api/tickets", async (req, res) => {
@@ -158,8 +148,16 @@ app.patch("/api/tickets/:id/status", async (req, res) => {
   }
 });
 
+// Prometheus metrics endpoint.
+// Kept only one /metrics route to avoid route duplication.
 app.get("/metrics", metricsEndpoint);
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Backend API running on port ${PORT}`);
-});
+async function startServer() {
+  await initializeDatabase();
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Backend API running on port ${PORT}`);
+  });
+}
+
+startServer();

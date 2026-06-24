@@ -1,0 +1,23 @@
+aws_region   = "eu-west-2"
+project_name = "incident-portal"
+environment  = "prod"
+
+
+# Replace ACCOUNT_ID with your AWS account ID
+frontend_image_uri = "ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-frontend:v1.0.0"
+backend_image_uri  = "ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-backend:v1.0.0"
+
+# Add this later after creating RDS + Secrets Manager.
+# Example:
+# database_url_secret_arn = "arn:aws:secretsmanager:eu-west-2:ACCOUNT_ID:secret:incident-portal/prod/database-url-xxxxxx"
+database_url_secret_arn = ""
+
+frontend_container_port = 8080
+backend_container_port  = 5000
+
+frontend_desired_count = 2
+backend_desired_count  = 2
+
+min_task_count   = 1
+max_task_count   = 4
+cpu_target_value = 70
