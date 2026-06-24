@@ -13,8 +13,8 @@ env:
   AWS_REGION: eu-west-2
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
-  BACKEND_ECR_REPOSITORY: incident-portal-prod-backend
-  FRONTEND_ECR_REPOSITORY: incident-portal-prod-frontend
+  BACKEND_ECR_REPOSITORY: incident-portal-backend
+  FRONTEND_ECR_REPOSITORY: incident-portal-frontend
 
   ECS_CLUSTER: incident-portal-prod-cluster
   BACKEND_SERVICE: incident-portal-prod-backend-service
