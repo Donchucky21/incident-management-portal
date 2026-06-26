@@ -156,7 +156,7 @@ resource "aws_cloudwatch_metric_alarm" "frontend_unhealthy_targets" {
   evaluation_periods  = 1
   threshold           = 1
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  treat_missing_data  = "notBreashing"
+  treat_missing_data  = "notBreaching"
 
   dimensions = {
     LoadBalancer = aws_lb.main.arn_suffix
