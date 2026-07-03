@@ -33,48 +33,20 @@ module "security_groups" {
   common_tags             = local.common_tags
 }
 
-resource "aws_db_subnet_group" "main" {
-  name = "${var.project_name}-${var.environment}-db-subnet-group"
+module "rds" {
+  source = "../../modules/rds"
 
+  project_name          = var.project_name
+  environment           = var.environment
+  rds_security_group_id = module.security_groups.rds_security_group_id
   subnet_ids = [
     module.vpc.private_app_subnet_az1_id,
     module.vpc.private_app_subnet_az2_id
   ]
 
-  tags = {
-    Name = "${var.project_name}-${var.environment}-db-subnet-group"
-  }
-}
-
-resource "aws_db_instance" "postgres" {
-  identifier = "${var.project_name}-${var.environment}-postgres"
-
-  engine         = "postgres"
-  engine_version = "16"
-  instance_class = "db.t3.micro"
-
-  allocated_storage     = 20
-  max_allocated_storage = 100
-  storage_type          = "gp2"
-
-  db_name  = var.db_name
-  username = var.db_username
-  password = var.db_password
-  port     = 5432
-
-  db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [module.security_groups.rds_security_group_id]
-
-  publicly_accessible = false
-  multi_az            = false
-
-  backup_retention_period = 1
-  deletion_protection     = false
-  skip_final_snapshot     = true
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-postgres"
-  }
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
 }
 
 resource "aws_secretsmanager_secret" "database_url" {
@@ -85,7 +57,7 @@ resource "aws_secretsmanager_secret" "database_url" {
 resource "aws_secretsmanager_secret_version" "database_url" {
   secret_id = aws_secretsmanager_secret.database_url.id
 
-  secret_string = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.postgres.address}:5432/${var.db_name}"
+  secret_string = "postgresql://${var.db_username}:${var.db_password}@${module.rds.db_address}:5432/${var.db_name}"
 }
 
 

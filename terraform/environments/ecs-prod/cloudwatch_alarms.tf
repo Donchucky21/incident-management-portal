@@ -180,7 +180,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_high" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    DBInstanceIdentifier = aws_db_instance.postgres.identifier
+    DBInstanceIdentifier = module.rds.db_instance_identifier
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
@@ -200,7 +200,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    DBInstanceIdentifier = aws_db_instance.postgres.identifier
+    DBInstanceIdentifier = module.rds.db_instance_identifier
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
