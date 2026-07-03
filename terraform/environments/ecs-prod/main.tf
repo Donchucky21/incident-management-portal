@@ -80,21 +80,6 @@ module "alb" {
   common_tags = local.common_tags
 }
 
-# resource "aws_lb_listener_rule" "api_to_backend" {
-#   listener_arn = module.alb.http_listener_arn
-#   priority     = 10
-
-#   action {
-#     type             = "forward"
-#     target_group_arn = module.alb.backend_target_group_arn
-#   }
-
-#   condition {
-#     path_pattern {
-#       values = ["/api/*"]
-#     }
-#   }
-# }
 
 module "iam" {
   source = "../../modules/iam"
@@ -111,9 +96,18 @@ module "iam" {
 module "cloudwatch" {
   source = "../../modules/cloudwatch"
 
-  project_name = var.project_name
-  environment  = var.environment
-  common_tags  = local.common_tags
+  project_name                     = var.project_name
+  name_prefix                      = local.name_prefix
+  environment                      = var.environment
+  common_tags                      = local.common_tags
+  alert_email                      = var.alert_email
+  alb_arn_suffix                   = module.alb.alb_arn_suffix
+  frontend_target_group_arn_suffix = module.alb.frontend_target_group_arn_suffix
+  backend_target_group_arn_suffix  = module.alb.backend_target_group_arn_suffix
+  rds_instance_identifier          = module.rds.db_instance_identifier
+  ecs_cluster_name                 = "${local.name_prefix}-cluster"
+  frontend_service_name            = "${local.name_prefix}-frontend-service"
+  backend_service_name             = "${local.name_prefix}-backend-service"
 }
 
 # ------------------------------------------------------------
