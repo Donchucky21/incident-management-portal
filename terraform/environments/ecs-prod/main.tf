@@ -60,6 +60,14 @@ module "secrets" {
   db_name      = var.db_name
 }
 
+module "acm" {
+  source = "../../modules/acm"
+
+  project_name            = var.project_name
+  environment             = var.environment
+  domain_name             = var.domain_name
+  validation_record_fqdns = module.route53.certificate_validation_record_fqdns
+}
 
 # ------------------------------------------------------------
 # Application Load Balancer
@@ -73,6 +81,7 @@ module "alb" {
   alb_security_group_id   = module.security_groups.alb_security_group_id
   frontend_container_port = var.frontend_container_port
   backend_container_port  = var.backend_container_port
+  certificate_arn         = module.acm.certificate_arn
   public_subnet_ids = [
     module.vpc.public_subnet_az1_id,
     module.vpc.public_subnet_az2_id
@@ -80,6 +89,15 @@ module "alb" {
   common_tags = local.common_tags
 }
 
+module "route53" {
+  source = "../../modules/route53"
+
+  hosted_zone_name                      = var.hosted_zone_name
+  domain_name                           = var.domain_name
+  certificate_domain_validation_options = module.acm.domain_validation_options
+  alb_dns_name                          = module.alb.alb_dns_name
+  alb_zone_id                           = module.alb.alb_zone_id
+}
 
 module "iam" {
   source = "../../modules/iam"
@@ -146,7 +164,6 @@ module "ecs" {
   ]
 
   depends_on = [
-    module.alb,
-    aws_lb_listener_rule.https_api
+    module.alb
   ]
 }

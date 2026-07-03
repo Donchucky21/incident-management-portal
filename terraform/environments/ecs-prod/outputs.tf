@@ -42,3 +42,8 @@ output "backend_log_group" {
   description = "Backend CloudWatch log group"
   value       = module.cloudwatch.backend_log_group_name
 }
+
+output "https_url" {
+  description = "HTTPS URL of the incident portal"
+  value       = module.route53.https_url
+}

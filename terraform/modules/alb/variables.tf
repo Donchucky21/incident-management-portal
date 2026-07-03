@@ -28,6 +28,11 @@ variable "backend_container_port" {
   type        = number
 }
 
+variable "certificate_arn" {
+  description = "Validated ACM certificate ARN for the HTTPS listener"
+  type        = string
+}
+
 variable "common_tags" {
   description = "Common tags applied to ALB resources"
   type        = map(string)

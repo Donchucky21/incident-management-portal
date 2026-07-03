@@ -42,3 +42,13 @@ output "http_listener_arn" {
   description = "ARN of the HTTP listener"
   value       = aws_lb_listener.http.arn
 }
+
+output "https_listener_arn" {
+  description = "ARN of the HTTPS listener"
+  value       = aws_lb_listener.https.arn
+}
+
+output "https_api_listener_rule_arn" {
+  description = "ARN of the HTTPS API listener rule"
+  value       = aws_lb_listener_rule.https_api.arn
+}
