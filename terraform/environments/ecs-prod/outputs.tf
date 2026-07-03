@@ -10,17 +10,17 @@ output "alb_zone_id" {
 
 output "ecs_cluster_name" {
   description = "ECS cluster name"
-  value       = aws_ecs_cluster.main.name
+  value       = module.ecs.ecs_cluster_name
 }
 
 output "frontend_service_name" {
   description = "Frontend ECS service name"
-  value       = aws_ecs_service.frontend.name
+  value       = module.ecs.frontend_service_name
 }
 
 output "backend_service_name" {
   description = "Backend ECS service name"
-  value       = aws_ecs_service.backend.name
+  value       = module.ecs.backend_service_name
 }
 
 output "frontend_target_group_arn" {
