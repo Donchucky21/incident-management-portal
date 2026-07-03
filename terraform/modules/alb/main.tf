@@ -1,43 +1,61 @@
-# create application load balancer
-resource "aws_lb" "application_load_balancer" {
-  name               = "my-alb"
+resource "aws_lb" "main" {
+  name               = "${var.name_prefix}-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_security_group_id]
-  subnets            = [var.public_subnet_az1_id, var.public_subnet_az2_id]
-  enable_deletion_protection = false
+  subnets            = var.public_subnet_ids
 
-  tags   = {
-    Name = "my-alb"
-  }
+  tags = merge(var.common_tags, {
+    Name = "${var.name_prefix}-alb"
+  })
 }
 
-# create target group
-resource "aws_lb_target_group" "alb_target_group" {
-  name        = "my-tg"
-  target_type = "instance"
-  port        = var.app_port
+resource "aws_lb_target_group" "frontend" {
+  name        = "${var.name_prefix}-frontend-tg"
+  port        = var.frontend_container_port
   protocol    = "HTTP"
+  target_type = "ip"
   vpc_id      = var.vpc_id
 
   health_check {
     enabled             = true
+    path                = "/"
+    matcher             = "200-399"
     interval            = 30
-    path                = var.health_check_path
     timeout             = 5
-    matcher             = 200
     healthy_threshold   = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 3
   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  tags = merge(var.common_tags, {
+    Name = "${var.name_prefix}-frontend-tg"
+  })
 }
 
-# create a listener on port 80 with redirect action
-resource "aws_lb_listener" "alb_http_listener" {
-  load_balancer_arn = aws_lb.application_load_balancer.arn
+resource "aws_lb_target_group" "backend" {
+  name        = "${var.name_prefix}-backend-tg"
+  port        = var.backend_container_port
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    enabled             = true
+    path                = "/health"
+    matcher             = "200-399"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${var.name_prefix}-backend-tg"
+  })
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -45,23 +63,9 @@ resource "aws_lb_listener" "alb_http_listener" {
     type = "redirect"
 
     redirect {
-      port        = 443
+      port        = "443"
       protocol    = "HTTPS"
       status_code = "HTTP_301"
     }
-  }
-}
-
-# create a listener on port 443 with forward action
-resource "aws_lb_listener" "alb_https_listener" {
-  load_balancer_arn  = aws_lb.application_load_balancer.arn
-  port               = 443
-  protocol           = "HTTPS"
-  ssl_policy         = "ELBSecurityPolicy-2016-08"
-  certificate_arn    = var.certificate_arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.alb_target_group.arn
   }
 }

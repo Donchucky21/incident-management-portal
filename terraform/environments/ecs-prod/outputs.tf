@@ -1,11 +1,11 @@
 output "alb_dns_name" {
   description = "Public DNS name of the Application Load Balancer"
-  value       = aws_lb.main.dns_name
+  value       = module.alb.alb_dns_name
 }
 
 output "alb_zone_id" {
   description = "ALB hosted zone ID for Route 53 alias records"
-  value       = aws_lb.main.zone_id
+  value       = module.alb.alb_zone_id
 }
 
 output "ecs_cluster_name" {
@@ -25,12 +25,12 @@ output "backend_service_name" {
 
 output "frontend_target_group_arn" {
   description = "Frontend target group ARN"
-  value       = aws_lb_target_group.frontend.arn
+  value       = module.alb.frontend_target_group_arn
 }
 
 output "backend_target_group_arn" {
   description = "Backend target group ARN"
-  value       = aws_lb_target_group.backend.arn
+  value       = module.alb.backend_target_group_arn
 }
 
 output "frontend_log_group" {

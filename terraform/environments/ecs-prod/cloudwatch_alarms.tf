@@ -117,8 +117,8 @@ resource "aws_cloudwatch_metric_alarm" "backend_target_5xx" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    LoadBalancer = aws_lb.main.arn_suffix
-    TargetGroup  = aws_lb_target_group.backend.arn_suffix
+    LoadBalancer = module.alb.alb_arn_suffix
+    TargetGroup  = module.alb.backend_target_group_arn_suffix
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
@@ -138,8 +138,8 @@ resource "aws_cloudwatch_metric_alarm" "backend_unhealthy_targets" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    LoadBalancer = aws_lb.main.arn_suffix
-    TargetGroup  = aws_lb_target_group.backend.arn_suffix
+    LoadBalancer = module.alb.alb_arn_suffix
+    TargetGroup  = module.alb.backend_target_group_arn_suffix
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
@@ -159,8 +159,8 @@ resource "aws_cloudwatch_metric_alarm" "frontend_unhealthy_targets" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    LoadBalancer = aws_lb.main.arn_suffix
-    TargetGroup  = aws_lb_target_group.frontend.arn_suffix
+    LoadBalancer = module.alb.alb_arn_suffix
+    TargetGroup  = module.alb.frontend_target_group_arn_suffix
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
