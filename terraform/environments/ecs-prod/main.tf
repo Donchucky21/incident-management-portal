@@ -125,18 +125,12 @@ module "iam" {
 # CloudWatch Log Groups
 # ------------------------------------------------------------
 
-resource "aws_cloudwatch_log_group" "frontend" {
-  name              = "/ecs/${var.project_name}/${var.environment}/frontend"
-  retention_in_days = 14
+module "cloudwatch" {
+  source = "../../modules/cloudwatch"
 
-  tags = local.common_tags
-}
-
-resource "aws_cloudwatch_log_group" "backend" {
-  name              = "/ecs/${var.project_name}/${var.environment}/backend"
-  retention_in_days = 14
-
-  tags = local.common_tags
+  project_name = var.project_name
+  environment  = var.environment
+  common_tags  = local.common_tags
 }
 
 # ------------------------------------------------------------
@@ -167,7 +161,7 @@ resource "aws_ecs_task_definition" "frontend" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.frontend.name
+          awslogs-group         = module.cloudwatch.frontend_log_group_name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "frontend"
         }
@@ -220,7 +214,7 @@ resource "aws_ecs_task_definition" "backend" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.backend.name
+          awslogs-group         = module.cloudwatch.backend_log_group_name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "backend"
         }

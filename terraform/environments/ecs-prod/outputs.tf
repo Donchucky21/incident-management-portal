@@ -35,10 +35,10 @@ output "backend_target_group_arn" {
 
 output "frontend_log_group" {
   description = "Frontend CloudWatch log group"
-  value       = aws_cloudwatch_log_group.frontend.name
+  value       = module.cloudwatch.frontend_log_group_name
 }
 
 output "backend_log_group" {
   description = "Backend CloudWatch log group"
-  value       = aws_cloudwatch_log_group.backend.name
+  value       = module.cloudwatch.backend_log_group_name
 }
