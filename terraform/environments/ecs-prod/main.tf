@@ -23,102 +23,14 @@ module "vpc" {
   private_db_subnet_az2_cidr  = "10.0.6.0/24"
 }
 
-# ------------------------------------------------------------
-# Security Groups
-# ------------------------------------------------------------
+module "security_groups" {
+  source = "../../modules/security-groups"
 
-resource "aws_security_group" "alb" {
-  name        = "${local.name_prefix}-alb-sg"
-  description = "Allow HTTP/HTTPS traffic to the Application Load Balancer"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    description = "HTTP from internet"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTPS from internet - reserved for SSL stage"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-alb-sg"
-  })
-}
-
-resource "aws_security_group" "ecs_tasks" {
-  name        = "${local.name_prefix}-ecs-tasks-sg"
-  description = "Allow ALB traffic to ECS Fargate tasks"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    description     = "Frontend traffic from ALB"
-    from_port       = var.frontend_container_port
-    to_port         = var.frontend_container_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-
-  ingress {
-    description     = "Backend traffic from ALB"
-    from_port       = var.backend_container_port
-    to_port         = var.backend_container_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-
-  egress {
-    description = "Allow outbound traffic from ECS tasks"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-ecs-tasks-sg"
-  })
-}
-
-resource "aws_security_group" "rds" {
-  name        = "${var.project_name}-${var.environment}-rds-sg"
-  description = "Allow PostgreSQL from ECS tasks"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    description     = "PostgreSQL from ECS tasks"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_tasks.id]
-  }
-
-  egress {
-    description = "Allow outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.project_name}-${var.environment}-rds-sg"
-  }
+  name_prefix             = local.name_prefix
+  vpc_id                  = module.vpc.vpc_id
+  frontend_container_port = var.frontend_container_port
+  backend_container_port  = var.backend_container_port
+  common_tags             = local.common_tags
 }
 
 resource "aws_db_subnet_group" "main" {
@@ -151,7 +63,7 @@ resource "aws_db_instance" "postgres" {
   port     = 5432
 
   db_subnet_group_name   = aws_db_subnet_group.main.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
+  vpc_security_group_ids = [module.security_groups.rds_security_group_id]
 
   publicly_accessible = false
   multi_az            = false
@@ -185,7 +97,7 @@ resource "aws_lb" "main" {
   name               = "${local.name_prefix}-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
+  security_groups    = [module.security_groups.alb_security_group_id]
   subnets = [
     module.vpc.public_subnet_az1_id,
     module.vpc.public_subnet_az2_id
@@ -466,7 +378,7 @@ resource "aws_ecs_service" "frontend" {
       module.vpc.private_app_subnet_az1_id,
       module.vpc.private_app_subnet_az2_id
     ]
-    security_groups  = [aws_security_group.ecs_tasks.id]
+    security_groups  = [module.security_groups.ecs_tasks_security_group_id]
     assign_public_ip = false
   }
 
@@ -501,7 +413,7 @@ resource "aws_ecs_service" "backend" {
       module.vpc.private_app_subnet_az1_id,
       module.vpc.private_app_subnet_az2_id
     ]
-    security_groups  = [aws_security_group.ecs_tasks.id]
+    security_groups  = [module.security_groups.ecs_tasks_security_group_id]
     assign_public_ip = false
   }
 
@@ -573,4 +485,3 @@ resource "aws_appautoscaling_policy" "backend_cpu" {
     }
   }
 }
-
