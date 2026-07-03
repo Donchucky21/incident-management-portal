@@ -49,15 +49,15 @@ module "rds" {
   db_password = var.db_password
 }
 
-resource "aws_secretsmanager_secret" "database_url" {
-  name        = "${var.project_name}/${var.environment}/database-url-v2"
-  description = "DATABASE_URL for Incident Portal backend"
-}
+module "secrets" {
+  source = "../../modules/secrets"
 
-resource "aws_secretsmanager_secret_version" "database_url" {
-  secret_id = aws_secretsmanager_secret.database_url.id
-
-  secret_string = "postgresql://${var.db_username}:${var.db_password}@${module.rds.db_address}:5432/${var.db_name}"
+  project_name = var.project_name
+  environment  = var.environment
+  db_username  = var.db_username
+  db_password  = var.db_password
+  db_address   = module.rds.db_address
+  db_name      = var.db_name
 }
 
 
@@ -216,7 +216,7 @@ resource "aws_iam_role_policy" "ecs_execution_read_database_secret" {
           "secretsmanager:GetSecretValue"
         ]
 
-        Resource = aws_secretsmanager_secret.database_url.arn
+        Resource = module.secrets.database_url_secret_arn
       }
     ]
   })
@@ -314,7 +314,7 @@ resource "aws_ecs_task_definition" "backend" {
       secrets = [
         {
           name      = "DATABASE_URL"
-          valueFrom = aws_secretsmanager_secret.database_url.arn
+          valueFrom = module.secrets.database_url_secret_arn
         }
       ]
 
