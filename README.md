@@ -89,4 +89,4 @@ cd terraform/environments/ecs-prod
 terraform destroy
 ```
 
-After destroy, verify that ECS, RDS, ALB, NAT Gateway, and Elastic IP resources have been removed.
+Important: After destroy, verify that ECS, RDS, ALB, NAT Gateway, and Elastic IP resources have been removed.
