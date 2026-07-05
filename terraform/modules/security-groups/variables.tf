@@ -1,21 +1,24 @@
+variable "name_prefix" {
+  description = "Prefix used for security group names"
+  type        = string
+}
+
 variable "vpc_id" {
   description = "VPC ID where the security groups will be created"
   type        = string
 }
 
-variable "app_port" {
-  description = "Application port"
+variable "frontend_container_port" {
+  description = "Frontend container port"
   type        = number
-  default     = 8080
 }
 
-variable "db_port" {
-  description = "Database port"
+variable "backend_container_port" {
+  description = "Backend container port"
   type        = number
-  default     = 5432
 }
 
-variable "my_ip" {
-  description = "Your public IP address for SSH access to bastion"
-  type        = string
+variable "common_tags" {
+  description = "Common tags applied to security groups"
+  type        = map(string)
 }

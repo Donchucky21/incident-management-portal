@@ -1,4 +1,4 @@
-## Incident Management Portal — AWS ECS Fargate Deployment
+cd ~/do cls## Incident Management Portal — AWS ECS Fargate Deployment
 
 This project is a containerized full-stack Incident Management Portal deployed to AWS using Terraform, Docker, ECS Fargate, Application Load Balancer, RDS PostgreSQL, Route 53, ACM, Secrets Manager, ECR, CloudWatch, and GitHub Actions.
 
