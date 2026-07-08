@@ -56,6 +56,20 @@ GitHub Actions is used to automate deployments. On push to the main branch, the 
 8. Updates the ECS frontend and backend services
 9. Validates the live HTTPS application endpoints
 
+### Week 6: Terraform Modules and Team Workflow
+
+For the Week 6 portfolio task, the infrastructure code was prepared for a more realistic team-based delivery workflow.
+
+Key changes included:
+
+* **Refactored ECS Terraform into reusable modules** so shared infrastructure components such as VPC, security groups, RDS, Secrets Manager, IAM, ALB, CloudWatch, ECS, ACM, and Route 53 are separated from the environment configuration.
+* **Used ticket-based branch naming** with branches such as `project-101-*`, `project-103-*`, and `project-107-*` to keep infrastructure changes linked to clear units of work.
+* **Created a PR-style workflow** where changes are developed on feature branches, pushed to GitHub, reviewed through pull requests, and merged only after checks pass.
+* **Added validation steps** through GitHub Actions to run Terraform formatting, initialization, validation, and planning before infrastructure changes are merged.
+* **Practiced Terraform plan review** by using `terraform plan` output to inspect what Terraform intends to create, update, or delete before applying changes.
+* **Documented module usage** so the production environment mainly calls reusable modules instead of defining every AWS resource directly in one large file.
+* **Prepared the project for team-based infrastructure delivery** by making the codebase easier to review, safer to change, and more consistent with collaborative DevOps practices.
+
 ### Key Problems Solved
 
 During the deployment, I resolved several real-world infrastructure issues, including:
@@ -90,4 +104,3 @@ terraform destroy
 ```
 
 Important: After destroy, verify that ECS, RDS, ALB, NAT Gateway, and Elastic IP resources have been removed...
-
