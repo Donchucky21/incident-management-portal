@@ -145,21 +145,3 @@ variable "hosted_zone_name" {
   description = "Route 53 hosted zone name"
   type        = string
 }
-
-variable "allowed_ssh_cidr" {
-  description = "CIDR block allowed to SSH to the EC2 instance"
-  type        = string
-  default     = "0.0.0.0/0"
-}
-
-variable "ec2_instance_type" {
-  description = "EC2 instance type for the Nginx host"
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "ec2_key_name" {
-  description = "Optional EC2 key pair name for SSH access"
-  type        = string
-  default     = null
-}

@@ -41,7 +41,6 @@ jobs:
       TF_ALERT_EMAIL: ${{ vars.TF_ALERT_EMAIL || secrets.TF_ALERT_EMAIL }}
       TF_DOMAIN_NAME: ${{ vars.TF_DOMAIN_NAME || secrets.TF_DOMAIN_NAME }}
       TF_HOSTED_ZONE_NAME: ${{ vars.TF_HOSTED_ZONE_NAME || secrets.TF_HOSTED_ZONE_NAME }}
-      TF_ALLOWED_SSH_CIDR: ${{ vars.TF_ALLOWED_SSH_CIDR || '203.0.113.10/32' }}
 
     steps:
       - name: Checkout repository
@@ -66,7 +65,6 @@ jobs:
           test -n "$TF_ALERT_EMAIL"
           test -n "$TF_DOMAIN_NAME"
           test -n "$TF_HOSTED_ZONE_NAME"
-          test -n "$TF_ALLOWED_SSH_CIDR"
 
       - name: Write Terraform variables
         run: |
@@ -79,7 +77,6 @@ jobs:
             --arg alert_email "$TF_ALERT_EMAIL" \
             --arg domain_name "$TF_DOMAIN_NAME" \
             --arg hosted_zone_name "$TF_HOSTED_ZONE_NAME" \
-            --arg allowed_ssh_cidr "$TF_ALLOWED_SSH_CIDR" \
             '{
               aws_region: $aws_region,
               project_name: "incident-portal",
@@ -89,9 +86,7 @@ jobs:
               db_password: $db_password,
               alert_email: $alert_email,
               domain_name: $domain_name,
-              hosted_zone_name: $hosted_zone_name,
-              allowed_ssh_cidr: $allowed_ssh_cidr,
-              ec2_instance_type: "t3.micro"
+              hosted_zone_name: $hosted_zone_name
             }' > terraform/environments/ecs-prod/ci.auto.tfvars.json
 
       - name: Terraform init
