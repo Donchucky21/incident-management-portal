@@ -1,6 +1,6 @@
 resource "aws_secretsmanager_secret" "database_url" {
-  name        = "${var.project_name}/${var.environment}/database-url-v2"
-  description = "DATABASE_URL for Incident Portal backend"
+  name                    = "${var.project_name}/${var.environment}/database-url-v2"
+  description             = "DATABASE_URL for Incident Portal backend"
   recovery_window_in_days = 0
 }
 
