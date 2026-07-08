@@ -99,6 +99,20 @@ module "route53" {
   alb_zone_id                           = module.alb.alb_zone_id
 }
 
+module "ec2_hosting" {
+  source = "../../modules/ec2-hosting"
+
+  project_name     = var.project_name
+  environment      = var.environment
+  name_prefix      = local.name_prefix
+  vpc_id           = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnet_az1_id
+  allowed_ssh_cidr = var.allowed_ssh_cidr
+  instance_type    = var.ec2_instance_type
+  key_name         = var.ec2_key_name
+  common_tags      = local.common_tags
+}
+
 module "iam" {
   source = "../../modules/iam"
 
