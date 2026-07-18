@@ -56,9 +56,9 @@ GitHub Actions is used to automate deployments. On push to the main branch, the 
 8. Updates the ECS frontend and backend services
 9. Validates the live HTTPS application endpoints
 
-### Week 6: Terraform Modules and Team Workflow
+Terraform Modules and Team Workflow
 
-For the Week 6 portfolio task, the infrastructure code was prepared for a more realistic team-based delivery workflow.
+For the portfolio task, the infrastructure code was prepared for a more realistic team-based delivery workflow.
 
 Key changes included:
 
