@@ -28,6 +28,7 @@ metadata:
   labels:
     app: postgres
 spec:
+  storageClassName: incident-portal-gp3
   accessModes:
     - ReadWriteOnce
   resources:
@@ -144,11 +145,6 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: postgres-data
-
-          spec:
-          storageClassName: incident-portal-gp3
-          accessModes:
-            - ReadWriteOnce
 
         - name: postgres-init
           configMap:
