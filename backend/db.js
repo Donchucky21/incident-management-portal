@@ -16,14 +16,15 @@ function cleanDatabaseUrl(databaseUrl) {
   return parsedUrl.toString();
 }
 
+const useSsl = process.env.DB_SSL !== "false";
 const pool = new Pool({
   connectionString: cleanDatabaseUrl(process.env.DATABASE_URL),
 
   // Keep SSL encryption enabled, but disable certificate-chain verification
   // for this ECS/RDS portfolio deployment.
-  ssl: {
+  ssl: useSsl ? {
     rejectUnauthorized: false,
-  },
+  } : false,
 
   max: 10,
   idleTimeoutMillis: 30000,
