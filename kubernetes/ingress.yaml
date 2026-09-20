@@ -24,3 +24,35 @@ spec:
                 name: frontend
                 port:
                   number: 80
+
+
+
+---
+
+#This ingress is for grafana
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-2:304650806285:certificate/3412005d-c10a-4e75-82de-e55ad2a141f5
+    external-dns.alpha.kubernetes.io/hostname: grafana.starttechapp.uk
+spec:
+  ingressClassName: alb
+  rules:
+    - host: grafana.starttechapp.uk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 80
