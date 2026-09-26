@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: incident-portal
+
+resources:
+  - external-secret.yaml
+  - ../../base
+  - ingress.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/environment: prod
+      app.kubernetes.io/part-of: incident-management-portal
+    includeSelectors: true
+
+images:
+  - name: 304650806285.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-backend
+    newTag: 7e64df445133a564fe1ebe710d216d151721518c
+  - name: 304650806285.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-frontend
+    newTag: 7e64df445133a564fe1ebe710d216d151721518c
