@@ -16,6 +16,6 @@ labels:
 
 images:
   - name: 304650806285.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-backend
-    newTag: 7e64df445133a564fe1ebe710d216d151721518c
+    newTag: 3bb6f8c17d25b178f72fd9f9370c5e7b47c8f582
   - name: 304650806285.dkr.ecr.eu-west-2.amazonaws.com/incident-portal-frontend
-    newTag: 7e64df445133a564fe1ebe710d216d151721518c
+    newTag: 3bb6f8c17d25b178f72fd9f9370c5e7b47c8f582
