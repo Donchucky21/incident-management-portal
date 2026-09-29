@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: incident-portal-stage
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Donchucky21/incident-management-portal.git
+    targetRevision: main
+    path: gitops/overlays/stage
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: incident-portal-stage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
